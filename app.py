@@ -7,7 +7,6 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
-import platform
 
 # Colores
 FUCSIA = "#FF00FF"
@@ -29,7 +28,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Título de la app y presentación
+# Título de la app
 st.title('Generación Aumentada por Recuperación (RAG) 💬')
 
 # Imagen debajo del primer título
@@ -38,15 +37,6 @@ try:
     st.image(image_chatt, width=350)
 except Exception as e:
     st.warning(f"No se pudo cargar la imagen chatt.jpg: {e}")
-
-st.write("Versión de Python:", platform.python_version())
-
-# Cargar y mostrar imagen original
-try:
-    image = Image.open('Chat_pdf.png')
-    st.image(image, width=350)
-except Exception as e:
-    st.warning(f"No se pudo cargar la imagen: {e}")
 
 # Información de la barra lateral
 with st.sidebar:
