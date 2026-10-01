@@ -9,15 +9,15 @@ from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 
 # Colores
-FUCSIA = "#FF00FF"
+AMARILLO_CLARO = "#FFFF99"
 LILA = "#C8A2C8"
 
-# Estilos globales: títulos en fucsia y párrafos en lila
+# Estilos globales: títulos en amarillo claro y párrafos en lila
 st.markdown(
     f"""
     <style>
     h1, h2, h3, h4, h5, h6 {{
-        color: {FUCSIA} !important;
+        color: {AMARILLO_CLARO} !important;
     }}
     p, label, .stMarkdown, .stAlert, [data-testid="stMarkdownContainer"] p,
     [data-testid="stWidgetLabel"] p, [data-testid="stText"] {{
@@ -31,7 +31,13 @@ st.markdown(
 # Título de la app
 st.title('Generación Aumentada por Recuperación (RAG) 💬')
 
-# Imagen debajo del primer título
+# Imágenes debajo del primer título
+try:
+    image_detecdog = Image.open('detecdog.jpg')
+    st.image(image_detecdog, width=350)
+except Exception as e:
+    st.warning(f"No se pudo cargar la imagen detecdog.jpg: {e}")
+
 try:
     image_chatt = Image.open('chatt.jpg')
     st.image(image_chatt, width=350)
