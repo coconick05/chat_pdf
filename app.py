@@ -9,43 +9,71 @@ from langchain.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 import platform
 
-# App title and presentation
+# Colores
+FUCSIA = "#FF00FF"
+LILA = "#C8A2C8"
+
+# Estilos globales: títulos en fucsia y párrafos en lila
+st.markdown(
+    f"""
+    <style>
+    h1, h2, h3, h4, h5, h6 {{
+        color: {FUCSIA} !important;
+    }}
+    p, label, .stMarkdown, .stAlert, [data-testid="stMarkdownContainer"] p,
+    [data-testid="stWidgetLabel"] p, [data-testid="stText"] {{
+        color: {LILA} !important;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Título de la app y presentación
 st.title('Generación Aumentada por Recuperación (RAG) 💬')
+
+# Imagen debajo del primer título
+try:
+    image_chatt = Image.open('chatt.jpg')
+    st.image(image_chatt, width=350)
+except Exception as e:
+    st.warning(f"No se pudo cargar la imagen chatt.jpg: {e}")
+
 st.write("Versión de Python:", platform.python_version())
 
-# Load and display image
+# Cargar y mostrar imagen original
 try:
     image = Image.open('Chat_pdf.png')
     st.image(image, width=350)
 except Exception as e:
     st.warning(f"No se pudo cargar la imagen: {e}")
 
-# Sidebar information
+# Información de la barra lateral
 with st.sidebar:
     st.subheader("Este Agente te ayudará a realizar análisis sobre el PDF cargado")
 
-# Get API key from user
+# Obtener la clave de API del usuario
 ke = st.text_input('Ingresa tu Clave de OpenAI', type="password")
 if ke:
     os.environ['OPENAI_API_KEY'] = ke
 else:
     st.warning("Por favor ingresa tu clave de API de OpenAI para continuar")
 
-# PDF uploader
+# Cargador de PDF
 pdf = st.file_uploader("Carga el archivo PDF", type="pdf")
 
-# Process the PDF if uploaded
+# Procesar el PDF si fue cargado
 if pdf is not None and ke:
     try:
-        # Extract text from PDF
+        # Extraer texto del PDF
         pdf_reader = PdfReader(pdf)
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
-        
+
         st.info(f"Texto extraído: {len(text)} caracteres")
-        
-        # Split text into chunks
+
+        # Dividir el texto en fragmentos
         text_splitter = CharacterTextSplitter(
             separator="\n",
             chunk_size=500,
@@ -54,36 +82,35 @@ if pdf is not None and ke:
         )
         chunks = text_splitter.split_text(text)
         st.success(f"Documento dividido en {len(chunks)} fragmentos")
-        
-        # Create embeddings and knowledge base
+
+        # Crear embeddings y base de conocimiento
         embeddings = OpenAIEmbeddings()
         knowledge_base = FAISS.from_texts(chunks, embeddings)
-        
-        # User question interface
+
+        # Interfaz de pregunta del usuario
         st.subheader("Escribe qué quieres saber sobre el documento")
         user_question = st.text_area(" ", placeholder="Escribe tu pregunta aquí...")
-        
-        # Process question when submitted
+
+        # Procesar la pregunta cuando se envía
         if user_question:
             docs = knowledge_base.similarity_search(user_question)
-            
-            # Use a current model instead of deprecated text-davinci-003
-            # Options: "gpt-3.5-turbo-instruct" or "gpt-4o" depending on your API access
+
+            # Usar un modelo actual en lugar del obsoleto text-davinci-003
             llm = OpenAI(temperature=0, model_name="gpt-4o-mini-2024-07-18")
-            
-            # Load QA chain
+
+            # Cargar la cadena de QA
             chain = load_qa_chain(llm, chain_type="stuff")
-            
-            # Run the chain
+
+            # Ejecutar la cadena
             response = chain.run(input_documents=docs, question=user_question)
-            
-            # Display the response
+
+            # Mostrar la respuesta
             st.markdown("### Respuesta:")
             st.markdown(response)
-                
+
     except Exception as e:
         st.error(f"Error al procesar el PDF: {str(e)}")
-        # Add detailed error for debugging
+        # Error detallado para depuración
         import traceback
         st.error(traceback.format_exc())
 elif pdf is not None and not ke:
